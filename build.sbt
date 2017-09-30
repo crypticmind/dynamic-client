@@ -53,13 +53,7 @@ lazy val server =
       mainClass := Some("ar.com.crypticmind.dc.Server"),
       buildInfoKeys := Seq[BuildInfoKey](organization, name, version),
       buildInfoPackage := "ar.com.crypticmind.dc",
-      // managedResources in Runtime += `client-impl`.base.getAbsoluteFile / "target" / s"stasi-client-impl-${version.value}.jar",
-      // managedResources in Runtime ++= (artifacts in `client-impl`),
-      resourceGenerators in Compile += Def.task {
-        (artifacts in (`client-impl`, Compile, packageBin))
-          .value
-          .collect { case a @ Artifact(artName, "jar", "jar", None, _, _, _) => `client-impl`.base / "target" / s"$artName-${version.value}.jar" }
-      }.taskValue,
+      resourceGenerators in Compile += (packageBin in (`client-impl`, Compile)).map(Seq(_)).taskValue,
       libraryDependencies ++= Seq(
         "com.typesafe"                  %   "config"                      % "1.3.0",
         "org.clapper"                   %%  "grizzled-slf4j"              % "1.3.1",
