@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true">
+
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern><![CDATA[%-4level %logger{4}: %message%n]]></pattern>
+        </encoder>
+    </appender>
+
+    <logger name="ar.com.crypticmind.dc" level="debug"/>
+
+    <root level="info">
+        <appender-ref ref="console" />
+    </root>
+
+</configuration>
