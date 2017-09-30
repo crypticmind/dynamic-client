@@ -41,30 +41,6 @@ lazy val releaseSettings = Seq(
   publishArtifact in (Compile, packageBin) := true
 )
 
-lazy val server =
-  project
-    .in(file("server"))
-    .enablePlugins(BuildInfoPlugin)
-    .settings(commonSettings: _*)
-    .settings(releaseSettings: _*)
-    .settings(
-      description := "Server",
-      name := "dc-server",
-      mainClass := Some("ar.com.crypticmind.dc.Server"),
-      buildInfoKeys := Seq[BuildInfoKey](organization, name, version),
-      buildInfoPackage := "ar.com.crypticmind.dc",
-      resourceGenerators in Compile += (packageBin in (`client-impl`, Compile)).map(Seq(_)).taskValue,
-      libraryDependencies ++= Seq(
-        "com.typesafe"                  %   "config"                      % "1.3.0",
-        "org.clapper"                   %%  "grizzled-slf4j"              % "1.3.1",
-        "org.slf4j"                     %   "slf4j-api"                   % "1.7.21",
-        "org.slf4j"                     %   "jcl-over-slf4j"              % "1.7.21",
-        "org.apache.logging.log4j"      %   "log4j-to-slf4j"              % "2.7",
-        "ch.qos.logback"                %   "logback-classic"             % "1.1.2",
-        "com.typesafe.akka"             %%  "akka-http"                   % "10.0.5"
-      )
-    )
-
 lazy val `client-lib` =
   project
     .in(file("client-lib"))
@@ -92,10 +68,48 @@ lazy val `client-impl` =
       autoScalaLibrary := false
     )
 
+lazy val consumer =
+  project
+    .in(file("consumer"))
+    .dependsOn(`client-lib`)
+    .settings(commonSettings: _*)
+    .settings(releaseSettings: _*)
+    .settings(
+      description := "Service consumer via client library",
+      name := "dc-consumer",
+      mainClass := Some("ar.com.crypticmind.dc.Consumer"),
+      crossPaths := false,
+      autoScalaLibrary := false
+    )
+
+lazy val server =
+  project
+    .in(file("server"))
+    .enablePlugins(BuildInfoPlugin)
+    .settings(commonSettings: _*)
+    .settings(releaseSettings: _*)
+    .settings(
+      description := "Server",
+      name := "dc-server",
+      mainClass := Some("ar.com.crypticmind.dc.Server"),
+      buildInfoKeys := Seq[BuildInfoKey](organization, name, version),
+      buildInfoPackage := "ar.com.crypticmind.dc",
+      resourceGenerators in Compile += (packageBin in (`client-impl`, Compile)).map(Seq(_)).taskValue,
+      libraryDependencies ++= Seq(
+        "com.typesafe"                  %   "config"                      % "1.3.0",
+        "org.clapper"                   %%  "grizzled-slf4j"              % "1.3.1",
+        "org.slf4j"                     %   "slf4j-api"                   % "1.7.21",
+        "org.slf4j"                     %   "jcl-over-slf4j"              % "1.7.21",
+        "org.apache.logging.log4j"      %   "log4j-to-slf4j"              % "2.7",
+        "ch.qos.logback"                %   "logback-classic"             % "1.1.2",
+        "com.typesafe.akka"             %%  "akka-http"                   % "10.0.5"
+      )
+    )
+
 lazy val stasi =
   project
     .in(file("."))
-    .aggregate(server, `client-lib`, `client-impl`)
+    .aggregate(`client-lib`, `client-impl`, server, consumer)
     .settings(commonSettings: _*)
     .settings(noReleaseSettings: _*)
     .settings(

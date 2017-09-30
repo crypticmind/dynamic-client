@@ -22,9 +22,14 @@ object Server extends App {
 
   private val route =
     pathPrefix("dynamic-client") {
-      pathEndOrSingleSlash {
+      path("library") {
         respondWithHeader(`Content-Disposition`(attachment, Map("filename" -> implJar))) {
           getFromResource(implJar, ContentTypes.`application/octet-stream`, getClass.getClassLoader)
+        }
+      } ~
+      path("version") {
+        get {
+          complete(BuildInfo.version)
         }
       }
     }
