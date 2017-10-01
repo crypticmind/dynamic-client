@@ -1,10 +1,9 @@
 package ar.com.crypticmind.dc;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
+import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
@@ -14,7 +13,7 @@ import java.nio.file.StandardCopyOption;
 
 public class ClientFactory {
 
-    public static Client getClient(URL endpoint) throws IOException, IllegalAccessException, InstantiationException, ClassNotFoundException {
+    public static Client getClient(URL endpoint) throws Exception {
 
         URL versionUrl = new URL(endpoint.toString() + "/dynamic-client/version");
         URL libUrl = new URL(endpoint.toString() + "/dynamic-client/library");
@@ -45,13 +44,14 @@ public class ClientFactory {
             System.out.println("Copied temporary copy to " + localLib.toString());
         }
 
-        return loadLib(localLib);
+        return loadLib(endpoint, localLib);
     }
 
-    private static Client loadLib(Path localLib) throws MalformedURLException, ClassNotFoundException, IllegalAccessException, InstantiationException {
+    private static Client loadLib(URL endpoint, Path localLib) throws Exception {
         URLClassLoader ucl = new URLClassLoader(new URL[] { localLib.toUri().toURL() }, ClientFactory.class.getClassLoader());
-        Class impl = Class.forName("ar.com.crypticmind.dc.ClientImpl", true, ucl);
-        return (Client) impl.newInstance();
+        Class<?> impl = Class.forName("ar.com.crypticmind.dc.ClientImpl", true, ucl);
+        Constructor<?> ctor = impl.getDeclaredConstructor(URL.class);
+        return Client.class.cast(ctor.newInstance(endpoint));
     }
 
 }

@@ -31,6 +31,11 @@ object Server extends App {
         get {
           complete(BuildInfo.version)
         }
+      } ~
+      path("service" / "sum" / IntNumber / IntNumber) { (a, b) =>
+        get {
+          complete(String.valueOf(a + b))
+        }
       }
     }
 
