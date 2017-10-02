@@ -106,7 +106,7 @@ lazy val server =
       )
     )
 
-lazy val stasi =
+lazy val `dynamic-client` =
   project
     .in(file("."))
     .aggregate(`client-lib`, `client-impl`, server, consumer)
