@@ -18,7 +18,7 @@ object Server extends App {
   implicit private val materializer: ActorMaterializer = ActorMaterializer()
   implicit private val ec: ExecutionContext = system.dispatcher
 
-  private val implJar = s"dc-client-impl-${BuildInfo.version}.jar"
+  private val implJar = s"dc-client-impl-${Version.VERSION}.jar"
 
   private val route =
     pathPrefix("dynamic-client") {
@@ -29,7 +29,7 @@ object Server extends App {
       } ~
       path("version") {
         get {
-          complete(BuildInfo.version)
+          complete(Version.VERSION)
         }
       } ~
       path("service" / "sum" / IntNumber / IntNumber) { (a, b) =>

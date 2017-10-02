@@ -41,9 +41,36 @@ lazy val releaseSettings = Seq(
   publishArtifact in (Compile, packageBin) := true
 )
 
+lazy val commons =
+  project
+    .in(file("commons"))
+    .settings(commonSettings: _*)
+    .settings(releaseSettings: _*)
+    .settings(
+      description := "Client library commons",
+      name := "dc-commons",
+      mainClass := None,
+      crossPaths := false,
+      autoScalaLibrary := false,
+      sourceGenerators in Compile += Def.task {
+        val file = (sourceManaged in Compile).value / "ar" / "com" / "crypticmind" / "dc" / "Version.java"
+        IO.write(file,
+          s"""
+            |package ar.com.crypticmind.dc;
+            |
+            |public class Version {
+            |    public static final String VERSION = "${version.value}";
+            |}
+            |
+          """.stripMargin)
+        Seq(file)
+      }.taskValue
+    )
+
 lazy val `client-lib` =
   project
     .in(file("client-lib"))
+    .dependsOn(commons)
     .settings(commonSettings: _*)
     .settings(releaseSettings: _*)
     .settings(
@@ -57,7 +84,7 @@ lazy val `client-lib` =
 lazy val `client-impl` =
   project
     .in(file("client-impl"))
-    .dependsOn(`client-lib`)
+    .dependsOn(commons, `client-lib`)
     .settings(commonSettings: _*)
     .settings(releaseSettings: _*)
     .settings(
@@ -85,15 +112,13 @@ lazy val consumer =
 lazy val server =
   project
     .in(file("server"))
-    .enablePlugins(BuildInfoPlugin)
+    .dependsOn(commons)
     .settings(commonSettings: _*)
     .settings(releaseSettings: _*)
     .settings(
       description := "Server",
       name := "dc-server",
       mainClass := Some("ar.com.crypticmind.dc.Server"),
-      buildInfoKeys := Seq[BuildInfoKey](organization, name, version),
-      buildInfoPackage := "ar.com.crypticmind.dc",
       resourceGenerators in Compile += (packageBin in (`client-impl`, Compile)).map(Seq(_)).taskValue,
       libraryDependencies ++= Seq(
         "com.typesafe"                  %   "config"                      % "1.3.0",
@@ -109,7 +134,7 @@ lazy val server =
 lazy val `dynamic-client` =
   project
     .in(file("."))
-    .aggregate(`client-lib`, `client-impl`, server, consumer)
+    .aggregate(commons, `client-lib`, `client-impl`, server, consumer)
     .settings(commonSettings: _*)
     .settings(noReleaseSettings: _*)
     .settings(
