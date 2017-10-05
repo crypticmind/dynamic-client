@@ -5,6 +5,9 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -15,6 +18,19 @@ public class HttpClient {
         try (InputStream is = conn.getInputStream()) {
             byte[] buffer = read(is, conn.getContentLength());
             return onSuccess.apply(buffer);
+        } catch (IOException e) {
+            try (InputStream es = conn.getErrorStream()) {
+                byte[] buffer = read(es, conn.getContentLength());
+                int statusCode = conn.getResponseCode();
+                throw new RuntimeException("GET " + url + " failed → HTTP " + statusCode + ": " + readString.apply(buffer));
+            }
+        }
+    }
+
+    public static void download(URL url, Path target) throws IOException {
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        try (InputStream is = conn.getInputStream()) {
+            Files.copy(is, target, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             try (InputStream es = conn.getErrorStream()) {
                 byte[] buffer = read(es, conn.getContentLength());
