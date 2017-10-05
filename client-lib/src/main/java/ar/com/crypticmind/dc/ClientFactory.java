@@ -12,6 +12,8 @@ import static ar.com.crypticmind.dc.HttpClient.*;
 
 public class ClientFactory {
 
+    
+
     public static Client getClient(URL endpoint) throws Exception {
 
 
