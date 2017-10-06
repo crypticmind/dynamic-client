@@ -11,9 +11,9 @@ import java.nio.file.StandardCopyOption;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class HttpClient {
+class HttpClient {
 
-    public static <T> T doGET(URL url, Function<byte[], T> onSuccess) throws IOException {
+    static <T> T doGET(URL url, Function<byte[], T> onSuccess) throws IOException {
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         try (InputStream is = conn.getInputStream()) {
             byte[] buffer = read(is, conn.getContentLength());
@@ -27,7 +27,7 @@ public class HttpClient {
         }
     }
 
-    public static void download(URL url, Path target) throws IOException {
+    static void download(URL url, Path target) throws IOException {
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         try (InputStream is = conn.getInputStream()) {
             Files.copy(is, target, StandardCopyOption.REPLACE_EXISTING);
@@ -40,9 +40,9 @@ public class HttpClient {
         }
     }
 
-    public static final Consumer<byte[]> ignore = buffer -> {};
+    static final Consumer<byte[]> ignore = buffer -> {};
 
-    public static Function<byte[], String> readString = buffer -> {
+    static Function<byte[], String> readString = buffer -> {
         try {
             return new String(buffer, "UTF-8");
         } catch (UnsupportedEncodingException e) {

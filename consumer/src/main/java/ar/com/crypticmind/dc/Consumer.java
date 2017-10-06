@@ -8,19 +8,23 @@ public class Consumer {
 
     public static void main(String[] args) throws Exception {
 
-        Client client = ClientFactory.getClient(new URL("http://localhost:8080"));
+        try (ClientProxy cp = new ClientProxy(new URL("http://localhost:8080"))) {
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
-        System.out.print("Input a --> ");
-        System.out.flush();
-        int a = Integer.parseInt(reader.readLine());
+            System.out.print("Input a --> ");
+            System.out.flush();
+            int a = Integer.parseInt(reader.readLine());
 
-        System.out.print("Input b --> ");
-        System.out.flush();
-        int b = Integer.parseInt(reader.readLine());
+            System.out.print("Input b --> ");
+            System.out.flush();
+            int b = Integer.parseInt(reader.readLine());
 
-        int sum = client.sum(a, b);
-        System.out.println(String.valueOf(a) + " + " + String.valueOf(b) + " = " + String.valueOf(sum));
+            Client client = cp.getClient().orElseThrow(() -> new Exception("No client available"));
+
+            int sum = client.sum(a, b);
+            System.out.println(String.valueOf(a) + " + " + String.valueOf(b) + " = " + String.valueOf(sum));
+
+        }
     }
 }

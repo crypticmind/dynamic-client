@@ -10,8 +10,13 @@ public class ClientImpl implements Client {
 
     private URL endpoint;
 
-    public ClientImpl(URL endpoint) {
+    ClientImpl(URL endpoint) {
         this.endpoint = endpoint;
+    }
+
+    @Override
+    public String version() throws Exception {
+        return Version.VERSION;
     }
 
     @Override
