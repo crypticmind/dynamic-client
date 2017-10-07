@@ -78,7 +78,11 @@ lazy val `client-lib` =
       name := "dc-client-lib",
       mainClass := None,
       crossPaths := false,
-      autoScalaLibrary := false
+      autoScalaLibrary := false,
+      libraryDependencies ++= Seq(
+        "junit"           % "junit"             % "4.12" % "test",
+        "org.mock-server" % "mockserver-netty"  % "3.11" % "test"
+      )
     )
 
 lazy val `client-impl` =

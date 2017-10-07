@@ -5,15 +5,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static ar.com.crypticmind.dc.HttpClient.doGET;
-import static ar.com.crypticmind.dc.HttpClient.download;
-import static ar.com.crypticmind.dc.HttpClient.readString;
+import static ar.com.crypticmind.dc.HttpClient.*;
 
 public class ClientProxy implements AutoCloseable {
 
@@ -32,15 +31,38 @@ public class ClientProxy implements AutoCloseable {
                     download(new URL(endpoint.toString() + "/dynamic-client/library"), tmpLib);
                     Files.copy(tmpLib, localLib, StandardCopyOption.REPLACE_EXISTING);
                 }
-                Container c = new Container(localLib, endpoint);
+                Container nc = new Container(localLib, endpoint);
                 System.out.println("Successfully initialized client version " + version);
-                container.set(c);
+                Container pc = container.getAndSet(nc);
+                if (pc == null)
+                    executor.scheduleWithFixedDelay(checkServerVersion, checkServerVersionEvery.toMillis(), checkServerVersionEvery.toMillis(), TimeUnit.MILLISECONDS);
             } catch (Exception ex) {
                 System.err.println("Could not pull client jar from server. Retrying in 5 seconds. Exception: " + ex);
-                executor.schedule(pullServerClient, 5, TimeUnit.SECONDS);
+                executor.schedule(pullServerClient, retryInitializationEvery.toMillis(), TimeUnit.MILLISECONDS);
             }
         };
-        executor.schedule(pullServerClient, 0, TimeUnit.SECONDS);
+        checkServerVersion = () -> Optional
+                .ofNullable(container.get())
+                .map(Container::getClient)
+                .flatMap(client -> {
+                    try {
+                        return Optional.ofNullable(client.version());
+                    } catch (Exception e) {
+                        return Optional.empty();
+                    }
+                })
+                .ifPresent(localVersion -> {
+                    try {
+                        String serverVersion = doGET(new URL(endpoint.toString() + "/dynamic-client/version"), readString);
+                        if (!localVersion.equals(serverVersion)) {
+                            System.out.println("Local version " + localVersion + ", server version " + serverVersion + ". Updating local client...");
+                            executor.submit(pullServerClient);
+                        }
+                    } catch (Exception ex) {
+                        System.err.println("Could not check server version. Exception: " + ex);
+                    }
+                });
+        executor.submit(pullServerClient);
     }
 
     public Optional<Client> getClient() {
@@ -55,9 +77,12 @@ public class ClientProxy implements AutoCloseable {
             c.close();
     }
 
+    Duration retryInitializationEvery = Duration.ofSeconds(5);
+    Duration checkServerVersionEvery = Duration.ofMinutes(15);
+
     private AtomicReference<Container> container;
     private ScheduledExecutorService executor;
     private Runnable pullServerClient;
-
+    private Runnable checkServerVersion;
 
 }
