@@ -17,7 +17,7 @@ import static ar.com.crypticmind.dc.HttpClient.readString;
 
 public class ClientProxy implements AutoCloseable {
 
-    public ClientProxy(URL endpoint) {
+    public ClientProxy(URL endpoint, Logger logger) {
         container = new AtomicReference<>();
         executor = Executors.newSingleThreadScheduledExecutor();
         pullServerClient = () -> {
@@ -33,10 +33,10 @@ public class ClientProxy implements AutoCloseable {
                     Files.copy(tmpLib, localLib, StandardCopyOption.REPLACE_EXISTING);
                 }
                 Container c = new Container(localLib, endpoint);
-                System.out.println("Successfully initialized client version " + version);
+                logger.info("Successfully initialized client version " + version, null);
                 container.set(c);
             } catch (Exception ex) {
-                System.err.println("Could not pull client jar from server. Retrying in 5 seconds. Exception: " + ex);
+                logger.error("Could not pull client jar from server. Retrying in 5 seconds. Exception: ", ex);
                 executor.schedule(pullServerClient, 5, TimeUnit.SECONDS);
             }
         };
@@ -58,6 +58,5 @@ public class ClientProxy implements AutoCloseable {
     private AtomicReference<Container> container;
     private ScheduledExecutorService executor;
     private Runnable pullServerClient;
-
 
 }

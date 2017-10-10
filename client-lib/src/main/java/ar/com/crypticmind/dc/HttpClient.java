@@ -11,44 +11,49 @@ import java.nio.file.StandardCopyOption;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-class HttpClient {
+public class HttpClient {
 
-    static <T> T doGET(URL url, Function<byte[], T> onSuccess) throws IOException {
+    public static <T> T doGET(URL url, Function<byte[], T> onSuccess) throws IOException {
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         try (InputStream is = conn.getInputStream()) {
             byte[] buffer = read(is, conn.getContentLength());
             return onSuccess.apply(buffer);
         } catch (IOException e) {
-            try (InputStream es = conn.getErrorStream()) {
-                byte[] buffer = read(es, conn.getContentLength());
-                int statusCode = conn.getResponseCode();
-                throw new RuntimeException("GET " + url + " failed → HTTP " + statusCode + ": " + readString.apply(buffer));
-            }
+            throw httpError(url, conn, e);
         }
     }
 
-    static void download(URL url, Path target) throws IOException {
+    public static void download(URL url, Path target) throws IOException {
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         try (InputStream is = conn.getInputStream()) {
             Files.copy(is, target, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            try (InputStream es = conn.getErrorStream()) {
-                byte[] buffer = read(es, conn.getContentLength());
-                int statusCode = conn.getResponseCode();
-                throw new RuntimeException("GET " + url + " failed → HTTP " + statusCode + ": " + readString.apply(buffer));
-            }
+            throw httpError(url, conn, e);
         }
     }
 
-    static final Consumer<byte[]> ignore = buffer -> {};
+    public static final Consumer<byte[]> ignore = buffer -> {};
 
-    static Function<byte[], String> readString = buffer -> {
+    public static Function<byte[], String> readString = buffer -> {
         try {
             return new String(buffer, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException("Could not read UTF-8 text response", e);
         }
     };
+
+    private static RuntimeException httpError(URL url, HttpURLConnection conn, IOException e) throws IOException {
+        int statusCode = conn.getResponseCode();
+        if (statusCode != -1) {
+            String response;
+            try (InputStream es = conn.getErrorStream()) {
+                byte[] buffer = read(es, conn.getContentLength());
+                response = readString.apply(buffer);
+            }
+            return new RuntimeException("GET " + url + " failed → HTTP " + statusCode + ": " + response);
+        } else
+            return new RuntimeException("GET " + url + " failed → " + e.getMessage());
+    }
 
     private static byte[] read(InputStream is, int length) throws IOException {
         byte[] buffer = new byte[length];

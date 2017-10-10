@@ -10,7 +10,7 @@ public class ClientImpl implements Client {
 
     private URL endpoint;
 
-    ClientImpl(URL endpoint) {
+    public ClientImpl(URL endpoint) {
         this.endpoint = endpoint;
     }
 
