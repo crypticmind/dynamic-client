@@ -8,37 +8,7 @@ public class Consumer {
 
     public static void main(String[] args) throws Exception {
 
-        Logger logger = new Logger() {
-            @Override
-            public void debug(String message, Throwable t) {
-                System.out.println("DEBUG: " + message + t);
-                if (t != null)
-                    t.printStackTrace();
-            }
-
-            @Override
-            public void info(String message, Throwable t) {
-                System.out.println("INFO: " + message + t);
-                if (t != null)
-                    t.printStackTrace();
-            }
-
-            @Override
-            public void warn(String message, Throwable t) {
-                System.out.println("WARN: " + message + t);
-                if (t != null)
-                    t.printStackTrace();
-            }
-
-            @Override
-            public void error(String message, Throwable t) {
-                System.err.println("ERROR: " + message + t);
-                if (t != null)
-                    t.printStackTrace();
-            }
-        };
-
-        try (ClientProxy cp = new ClientProxy(new URL("http://localhost:8080"), logger)) {
+        try (ClientProxy cp = new ClientProxy(new URL("http://localhost:8080"), new LoggerImpl())) {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
