@@ -21,4 +21,9 @@ public class CommonsLoggingLogger implements Logger {
         logger.error(message, t);
     }
 
+    @Override
+    public void warn(String message, Throwable t) {
+        logger.warn(message, t);
+    }
+
 }

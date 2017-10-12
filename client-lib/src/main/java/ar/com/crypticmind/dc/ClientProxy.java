@@ -69,7 +69,7 @@ public class ClientProxy implements AutoCloseable {
                             executor.submit(pullServerClient);
                         }
                     } catch (Exception ex) {
-                        logger.error("Could not check server version. Exception: ", ex);
+                        logger.warn("Could not check server version. Exception: ", ex);
                     }
                 });
         executor.submit(pullServerClient);

@@ -8,4 +8,6 @@ public interface Logger {
 
     void error(String message, Throwable t);
 
+    void warn(String message, Throwable t);
+
 }

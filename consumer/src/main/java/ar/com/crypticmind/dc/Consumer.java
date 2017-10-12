@@ -6,12 +6,27 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Optional;
+//import java.util.Random;
 
 public class Consumer {
 
     public static void main(String[] args) throws Exception {
 
         try (ClientProxy cp = new ClientProxy(new URL("http://localhost:8080"), new Slf4jLogger())) {
+
+//            while (cp.getClient() == null)
+//                Thread.sleep(200);
+//
+//            Random r = new Random();
+//
+//            while (true) {
+//                int a = r.nextInt(1000000);
+//                int b = r.nextInt(1000000);
+//                try {
+//                    cp.getClient().sum(a, b);
+//                } catch (Exception e) {
+//                }
+//            }
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
