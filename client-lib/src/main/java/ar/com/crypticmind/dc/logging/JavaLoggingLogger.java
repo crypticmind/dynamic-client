@@ -4,7 +4,12 @@ import ar.com.crypticmind.dc.Client;
 
 public class JavaLoggingLogger implements Logger {
 
-    private final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(Client.class.getPackage().getName());
+    private final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(Client.class.getName());
+
+    @Override
+    public void debug(String message) {
+        logger.fine(message);
+    }
 
     @Override
     public void info(String message) {

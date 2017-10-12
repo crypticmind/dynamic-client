@@ -4,7 +4,12 @@ import ar.com.crypticmind.dc.Client;
 
 public class Slf4jLogger implements Logger {
 
-    private final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(Client.class.getPackage().getName());
+    private final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(Client.class);
+
+    @Override
+    public void debug(String message) {
+        logger.debug(message);
+    }
 
     @Override
     public void info(String message) {

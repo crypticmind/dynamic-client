@@ -4,7 +4,12 @@ import ar.com.crypticmind.dc.Client;
 
 public class CommonsLoggingLogger implements Logger {
 
-    private final org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(Client.class.getPackage().getName());
+    private final org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(Client.class);
+
+    @Override
+    public void debug(String message) {
+        logger.debug(message);
+    }
 
     @Override
     public void info(String message) {

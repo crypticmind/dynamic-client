@@ -1,5 +1,7 @@
 package ar.com.crypticmind.dc;
 
+import ar.com.crypticmind.dc.logging.Logger;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -13,7 +15,12 @@ import java.util.function.Function;
 
 public class HttpClient {
 
-    public static <T> T doGET(URL url, Function<byte[], T> onSuccess) throws IOException {
+    public HttpClient(Logger logger) {
+        this.logger = logger;
+    }
+
+    public <T> T doGET(URL url, Function<byte[], T> onSuccess) throws IOException {
+        logger.debug("GET " + url);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         try (InputStream is = conn.getInputStream()) {
             byte[] buffer = read(is, conn.getContentLength());
@@ -23,7 +30,8 @@ public class HttpClient {
         }
     }
 
-    public static void download(URL url, Path target) throws IOException {
+    public void download(URL url, Path target) throws IOException {
+        logger.debug("GET " + url + " to " + target);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         try (InputStream is = conn.getInputStream()) {
             Files.copy(is, target, StandardCopyOption.REPLACE_EXISTING);
@@ -42,7 +50,9 @@ public class HttpClient {
         }
     };
 
-    private static RuntimeException httpError(URL url, HttpURLConnection conn, IOException e) throws IOException {
+    private Logger logger;
+
+    private RuntimeException httpError(URL url, HttpURLConnection conn, IOException e) throws IOException {
         int statusCode = conn.getResponseCode();
         if (statusCode != -1) {
             String response;
@@ -55,7 +65,7 @@ public class HttpClient {
             return new RuntimeException("GET " + url + " failed → " + e.getMessage());
     }
 
-    private static byte[] read(InputStream is, int length) throws IOException {
+    private byte[] read(InputStream is, int length) throws IOException {
         byte[] buffer = new byte[length];
         int pos = 0;
         int b;

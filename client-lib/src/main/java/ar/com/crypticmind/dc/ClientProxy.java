@@ -19,21 +19,29 @@ import static ar.com.crypticmind.dc.HttpClient.*;
 public class ClientProxy implements AutoCloseable {
 
     public ClientProxy(URL endpoint, Logger logger) {
+
+        logger.debug("Initializing client against server at " + endpoint);
+
+        HttpClient httpClient = new HttpClient(logger);
         container = new AtomicReference<>();
         executor = Executors.newSingleThreadScheduledExecutor();
         pullServerClient = () -> {
             try {
                 Path tmpDir = Paths.get(System.getProperty("java.io.tmpdir"));
-                String version = doGET(new URL(endpoint.toString() + "/dynamic-client/version"), readString);
+
+                String version = httpClient.doGET(new URL(endpoint.toString() + "/dynamic-client/version"), readString);
                 if (version == null || version.trim().isEmpty())
                     throw new Exception("Got null or empty version from server");
+                logger.debug("Got version " + version + " from server");
                 Path localLib = tmpDir.resolve("dc-client-impl-" + version + ".jar");
                 Path tmpLib = Files.createTempFile("dc-client-impl-" + version + ".jar.download-", "");
                 if (!Files.exists(localLib) || version.endsWith("SNAPSHOT")) {
-                    download(new URL(endpoint.toString() + "/dynamic-client/library"), tmpLib);
+                    logger.debug("Local copy version " + version + " does not exist or is a snapshot.");
+                    httpClient.download(new URL(endpoint.toString() + "/dynamic-client/library"), tmpLib);
                     Files.copy(tmpLib, localLib, StandardCopyOption.REPLACE_EXISTING);
+                    logger.debug("Installed local copy version " + version + " at " + localLib);
                 }
-                Container nc = new Container(localLib, endpoint);
+                Container nc = new Container(localLib, endpoint, logger);
                 logger.info("Successfully initialized client version " + version);
                 Container pc = container.getAndSet(nc);
                 if (pc == null)
@@ -55,13 +63,13 @@ public class ClientProxy implements AutoCloseable {
                 })
                 .ifPresent(localVersion -> {
                     try {
-                        String serverVersion = doGET(new URL(endpoint.toString() + "/dynamic-client/version"), readString);
+                        String serverVersion = httpClient.doGET(new URL(endpoint.toString() + "/dynamic-client/version"), readString);
                         if (!localVersion.equals(serverVersion)) {
-                            System.out.println("Local version " + localVersion + ", server version " + serverVersion + ". Updating local client...");
+                            logger.info("Local version " + localVersion + ", server version " + serverVersion + ". Updating local client...");
                             executor.submit(pullServerClient);
                         }
                     } catch (Exception ex) {
-                        System.err.println("Could not check server version. Exception: " + ex);
+                        logger.error("Could not check server version. Exception: ", ex);
                     }
                 });
         executor.submit(pullServerClient);
