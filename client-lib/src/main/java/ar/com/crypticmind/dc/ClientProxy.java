@@ -1,5 +1,7 @@
 package ar.com.crypticmind.dc;
 
+import ar.com.crypticmind.dc.logging.Logger;
+
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,7 +34,7 @@ public class ClientProxy implements AutoCloseable {
                     Files.copy(tmpLib, localLib, StandardCopyOption.REPLACE_EXISTING);
                 }
                 Container nc = new Container(localLib, endpoint);
-                logger.info("Successfully initialized client version " + version, null);
+                logger.info("Successfully initialized client version " + version);
                 Container pc = container.getAndSet(nc);
                 if (pc == null)
                     executor.scheduleWithFixedDelay(checkServerVersion, checkServerVersionEvery.toMillis(), checkServerVersionEvery.toMillis(), TimeUnit.MILLISECONDS);
@@ -65,8 +67,12 @@ public class ClientProxy implements AutoCloseable {
         executor.submit(pullServerClient);
     }
 
-    public Optional<Client> getClient() {
-        return Optional.ofNullable(container.get()).map(Container::getClient);
+    public Client getClient() {
+        Container ct = container.get();
+        if (ct != null)
+            return ct.getClient();
+        else
+            return null;
     }
 
     @Override

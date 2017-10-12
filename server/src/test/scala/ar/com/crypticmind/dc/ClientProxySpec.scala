@@ -2,6 +2,7 @@ package ar.com.crypticmind.dc
 
 import java.net.URL
 
+import ar.com.crypticmind.dc.logging.{Logger, Slf4jLogger}
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.model.{HttpRequest, HttpResponse}
 import org.mockserver.socket.PortFactory
@@ -24,13 +25,6 @@ class ClientProxySpec extends WordSpec with Matchers with Eventually {
     server.reset()
   }
 
-  object NullLogger extends Logger {
-    def debug(message: String, t: Throwable): Unit = ()
-    def info(message: String, t: Throwable): Unit = ()
-    def warn(message: String, t: Throwable): Unit = ()
-    def error(message: String, t: Throwable): Unit = ()
-  }
-
   "The client proxy" should {
     "get a client" in {
       server
@@ -43,14 +37,14 @@ class ClientProxySpec extends WordSpec with Matchers with Eventually {
         .when(HttpRequest.request.withPath("/dynamic-client/service/sum/2/3"))
         .respond(HttpResponse.response("5"))
 
-      val cp = new ClientProxy(new URL(s"http://localhost:$port"), NullLogger)
+      val cp = new ClientProxy(new URL(s"http://localhost:$port"), new Slf4jLogger)
 
       eventually {
-        cp.getClient.isPresent shouldBe true
+        Option(cp.getClient) shouldBe defined
       }
 
-      cp.getClient.ifPresent(c => c.version() shouldBe Version.VERSION)
-      cp.getClient.ifPresent(c => c.sum(2, 3) shouldBe 5)
+      Option(cp.getClient).map(c => c.version()) should contain (Version.VERSION)
+      Option(cp.getClient).map(c => c.sum(2, 3)) should contain (5)
 
       server.verify(HttpRequest.request.withPath("/dynamic-client/version"))
       server.verify(HttpRequest.request.withPath("/dynamic-client/library"))

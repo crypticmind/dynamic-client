@@ -1,14 +1,17 @@
 package ar.com.crypticmind.dc;
 
+import ar.com.crypticmind.dc.logging.Slf4jLogger;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.Optional;
 
 public class Consumer {
 
     public static void main(String[] args) throws Exception {
 
-        try (ClientProxy cp = new ClientProxy(new URL("http://localhost:8080"), new LoggerImpl())) {
+        try (ClientProxy cp = new ClientProxy(new URL("http://localhost:8080"), new Slf4jLogger())) {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
@@ -20,7 +23,7 @@ public class Consumer {
             System.out.flush();
             int b = Integer.parseInt(reader.readLine());
 
-            Client client = cp.getClient().orElseThrow(() -> new Exception("No client available"));
+            Client client = Optional.ofNullable(cp.getClient()).orElseThrow(() -> new Exception("No client available"));
 
             int sum = client.sum(a, b);
             System.out.println(String.valueOf(a) + " + " + String.valueOf(b) + " = " + String.valueOf(sum));

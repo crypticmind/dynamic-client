@@ -78,7 +78,12 @@ lazy val `client-lib` =
       name := "dc-client-lib",
       mainClass := None,
       crossPaths := false,
-      autoScalaLibrary := false
+      autoScalaLibrary := false,
+      libraryDependencies ++= Seq(
+        "org.slf4j"                 % "slf4j-api"       % "1.7.21"  % "provided",
+        "org.apache.logging.log4j"  % "log4j-api"       % "2.9.1"   % "provided",
+        "commons-logging"           % "commons-logging" % "1.2"     % "provided"
+      )
     )
 
 lazy val `client-impl` =
@@ -106,7 +111,11 @@ lazy val consumer =
       name := "dc-consumer",
       mainClass := Some("ar.com.crypticmind.dc.Consumer"),
       crossPaths := false,
-      autoScalaLibrary := false
+      autoScalaLibrary := false,
+      libraryDependencies ++= Seq(
+        "org.slf4j"                     %   "slf4j-api"                   % "1.7.21",
+        "ch.qos.logback"                %   "logback-classic"             % "1.1.2"
+      )
     )
 
 lazy val server =
