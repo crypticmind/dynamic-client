@@ -2,15 +2,8 @@ package ar.com.crypticmind.dc;
 
 public interface Client {
 
-    default String version() throws Exception {
-        return "0";
-    }
+    String version() throws Exception;
 
-    default int sum(int a, int b) throws Exception {
-        return 0;
-    }
+    int sum(int a, int b) throws Exception;
 
-    static Client dummy() {
-        return new Client() {};
-    }
 }

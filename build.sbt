@@ -31,8 +31,8 @@ lazy val commonSettings = Seq(
 
 lazy val noReleaseSettings = Seq(
   publishArtifact := false,
-  publish := (),
-  publishLocal := ()
+  publish := {},
+  publishLocal := {}
 )
 
 lazy val releaseSettings = Seq(
@@ -78,7 +78,12 @@ lazy val `client-lib` =
       name := "dc-client-lib",
       mainClass := None,
       crossPaths := false,
-      autoScalaLibrary := false
+      autoScalaLibrary := false,
+      libraryDependencies ++= Seq(
+        "org.slf4j"                 % "slf4j-api"       % "1.7.21"  % "provided",
+        "org.apache.logging.log4j"  % "log4j-api"       % "2.9.1"   % "provided",
+        "commons-logging"           % "commons-logging" % "1.2"     % "provided"
+      )
     )
 
 lazy val `client-impl` =
@@ -106,13 +111,17 @@ lazy val consumer =
       name := "dc-consumer",
       mainClass := Some("ar.com.crypticmind.dc.Consumer"),
       crossPaths := false,
-      autoScalaLibrary := false
+      autoScalaLibrary := false,
+      libraryDependencies ++= Seq(
+        "org.slf4j"                     %   "slf4j-api"                   % "1.7.21",
+        "ch.qos.logback"                %   "logback-classic"             % "1.1.2"
+      )
     )
 
 lazy val server =
   project
     .in(file("server"))
-    .dependsOn(commons)
+    .dependsOn(commons % "compile->compile", `client-lib` % "test->test")
     .settings(commonSettings: _*)
     .settings(releaseSettings: _*)
     .settings(
@@ -127,7 +136,9 @@ lazy val server =
         "org.slf4j"                     %   "jcl-over-slf4j"              % "1.7.21",
         "org.apache.logging.log4j"      %   "log4j-to-slf4j"              % "2.7",
         "ch.qos.logback"                %   "logback-classic"             % "1.1.2",
-        "com.typesafe.akka"             %%  "akka-http"                   % "10.0.5"
+        "com.typesafe.akka"             %%  "akka-http"                   % "10.0.5",
+        "org.scalatest"                 %%  "scalatest"                   % "3.0.4"   % "test",
+        "org.mock-server"               %   "mockserver-netty"            % "3.11"    % "test"
       )
     )
 

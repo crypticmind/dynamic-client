@@ -40,7 +40,7 @@ The consumer asks the factory for a client, and the uses it to perform an exampl
 
 ## Implementation Details
 
-The `server` is coded in Scala, but all the other components are code in Java
+The `server` is coded in Scala, but all the other components are coded in Java
 to provide a library that has as few dependencies as possible. Even though 
 the client may depend on a logging library or any other utilities, coding it 
 in any other language than Java would have required a dependency on that 
