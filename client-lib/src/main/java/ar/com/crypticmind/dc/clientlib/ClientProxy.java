@@ -1,6 +1,6 @@
-package ar.com.crypticmind.dc;
+package ar.com.crypticmind.dc.clientlib;
 
-import ar.com.crypticmind.dc.logging.Logger;
+import ar.com.crypticmind.dc.clientlib.logging.Logger;
 
 import java.net.URL;
 import java.nio.file.Files;
@@ -14,7 +14,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static ar.com.crypticmind.dc.HttpClient.*;
+import static ar.com.crypticmind.dc.clientlib.HttpClient.*;
 
 public class ClientProxy implements AutoCloseable {
 

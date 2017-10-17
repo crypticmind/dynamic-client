@@ -1,6 +1,8 @@
-package ar.com.crypticmind.dc;
+package ar.com.crypticmind.dc.consumer;
 
-import ar.com.crypticmind.dc.logging.Slf4jLogger;
+import ar.com.crypticmind.dc.clientlib.Client;
+import ar.com.crypticmind.dc.clientlib.ClientProxy;
+import ar.com.crypticmind.dc.clientlib.logging.Slf4jLogger;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

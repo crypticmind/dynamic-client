@@ -1,11 +1,13 @@
-package ar.com.crypticmind.dc;
+package ar.com.crypticmind.dc.clientimpl;
 
-import ar.com.crypticmind.dc.logging.Logger;
+import ar.com.crypticmind.dc.clientlib.Client;
+import ar.com.crypticmind.dc.clientlib.HttpClient;
+import ar.com.crypticmind.dc.clientlib.logging.Logger;
 
 import java.io.IOException;
 import java.net.URL;
 
-import static ar.com.crypticmind.dc.HttpClient.readString;
+import static ar.com.crypticmind.dc.clientlib.HttpClient.readString;
 
 public class ClientImpl implements Client {
 

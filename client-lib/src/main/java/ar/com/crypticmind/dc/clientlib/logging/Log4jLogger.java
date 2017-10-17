@@ -1,6 +1,6 @@
-package ar.com.crypticmind.dc.logging;
+package ar.com.crypticmind.dc.clientlib.logging;
 
-import ar.com.crypticmind.dc.Client;
+import ar.com.crypticmind.dc.clientlib.Client;
 
 public class Log4jLogger implements Logger {
 

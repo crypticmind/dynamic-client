@@ -1,6 +1,6 @@
-package ar.com.crypticmind.dc;
+package ar.com.crypticmind.dc.clientlib;
 
-import ar.com.crypticmind.dc.logging.Logger;
+import ar.com.crypticmind.dc.clientlib.logging.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;

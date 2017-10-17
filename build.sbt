@@ -41,36 +41,9 @@ lazy val releaseSettings = Seq(
   publishArtifact in (Compile, packageBin) := true
 )
 
-lazy val commons =
-  project
-    .in(file("commons"))
-    .settings(commonSettings: _*)
-    .settings(releaseSettings: _*)
-    .settings(
-      description := "Client library commons",
-      name := "dc-commons",
-      mainClass := None,
-      crossPaths := false,
-      autoScalaLibrary := false,
-      sourceGenerators in Compile += Def.task {
-        val file = (sourceManaged in Compile).value / "ar" / "com" / "crypticmind" / "dc" / "Version.java"
-        IO.write(file,
-          s"""
-            |package ar.com.crypticmind.dc;
-            |
-            |public class Version {
-            |    public static final String VERSION = "${version.value}";
-            |}
-            |
-          """.stripMargin)
-        Seq(file)
-      }.taskValue
-    )
-
 lazy val `client-lib` =
   project
     .in(file("client-lib"))
-    .dependsOn(commons)
     .settings(commonSettings: _*)
     .settings(releaseSettings: _*)
     .settings(
@@ -79,6 +52,19 @@ lazy val `client-lib` =
       mainClass := None,
       crossPaths := false,
       autoScalaLibrary := false,
+      sourceGenerators in Compile += Def.task {
+        val file = (sourceManaged in Compile).value / "ar" / "com" / "crypticmind" / "dc" / "clientlib" / "Version.java"
+        IO.write(file,
+          s"""package ar.com.crypticmind.dc.clientlib;
+             |
+             |public class Version {
+             |    public static final String VERSION = "${version.value}";
+             |}
+             |""".stripMargin)
+        Seq(file)
+      }.taskValue,
+      releaseVersionFile := baseDirectory.value / "version.sbt",
+      releaseUseGlobalVersion := false,
       libraryDependencies ++= Seq(
         "org.slf4j"                 % "slf4j-api"       % "1.7.21"  % "provided",
         "org.apache.logging.log4j"  % "log4j-api"       % "2.9.1"   % "provided",
@@ -89,7 +75,7 @@ lazy val `client-lib` =
 lazy val `client-impl` =
   project
     .in(file("client-impl"))
-    .dependsOn(commons, `client-lib`)
+    .dependsOn(`client-lib`)
     .settings(commonSettings: _*)
     .settings(releaseSettings: _*)
     .settings(
@@ -97,7 +83,20 @@ lazy val `client-impl` =
       name := "dc-client-impl",
       mainClass := None,
       crossPaths := false,
-      autoScalaLibrary := false
+      autoScalaLibrary := false,
+      sourceGenerators in Compile += Def.task {
+        val file = (sourceManaged in Compile).value / "ar" / "com" / "crypticmind" / "dc" / "clientimpl" / "Version.java"
+        IO.write(file,
+          s"""package ar.com.crypticmind.dc.clientimpl;
+             |
+             |public class Version {
+             |    public static final String VERSION = "${version.value}";
+             |}
+             |""".stripMargin)
+        Seq(file)
+      }.taskValue,
+      releaseVersionFile := baseDirectory.value / "version.sbt",
+      releaseUseGlobalVersion := false
     )
 
 lazy val consumer =
@@ -112,6 +111,19 @@ lazy val consumer =
       mainClass := Some("ar.com.crypticmind.dc.Consumer"),
       crossPaths := false,
       autoScalaLibrary := false,
+      sourceGenerators in Compile += Def.task {
+        val file = (sourceManaged in Compile).value / "ar" / "com" / "crypticmind" / "dc" / "consumer" / "Version.java"
+        IO.write(file,
+          s"""package ar.com.crypticmind.dc.consumer;
+             |
+             |public class Version {
+             |    public static final String VERSION = "${version.value}";
+             |}
+             |""".stripMargin)
+        Seq(file)
+      }.taskValue,
+      releaseVersionFile := baseDirectory.value / "version.sbt",
+      releaseUseGlobalVersion := false,
       libraryDependencies ++= Seq(
         "org.slf4j"                     %   "slf4j-api"                   % "1.7.21",
         "ch.qos.logback"                %   "logback-classic"             % "1.1.2"
@@ -121,7 +133,7 @@ lazy val consumer =
 lazy val server =
   project
     .in(file("server"))
-    .dependsOn(commons % "compile->compile", `client-lib` % "test->test")
+    .dependsOn(`client-lib` % "test->test", `client-impl`)
     .settings(commonSettings: _*)
     .settings(releaseSettings: _*)
     .settings(
@@ -129,6 +141,19 @@ lazy val server =
       name := "dc-server",
       mainClass := Some("ar.com.crypticmind.dc.Server"),
       resourceGenerators in Compile += (packageBin in (`client-impl`, Compile)).map(Seq(_)).taskValue,
+      sourceGenerators in Compile += Def.task {
+        val file = (sourceManaged in Compile).value / "ar" / "com" / "crypticmind" / "dc" / "server" / "Version.java"
+        IO.write(file,
+          s"""package ar.com.crypticmind.dc.server;
+             |
+             |public class Version {
+             |    public static final String VERSION = "${version.value}";
+             |}
+             |""".stripMargin)
+        Seq(file)
+      }.taskValue,
+      releaseVersionFile := baseDirectory.value / "version.sbt",
+      releaseUseGlobalVersion := false,
       libraryDependencies ++= Seq(
         "com.typesafe"                  %   "config"                      % "1.3.0",
         "org.clapper"                   %%  "grizzled-slf4j"              % "1.3.1",
@@ -145,7 +170,7 @@ lazy val server =
 lazy val `dynamic-client` =
   project
     .in(file("."))
-    .aggregate(commons, `client-lib`, `client-impl`, server, consumer)
+    .aggregate(`client-lib`, `client-impl`, server, consumer)
     .settings(commonSettings: _*)
     .settings(noReleaseSettings: _*)
     .settings(

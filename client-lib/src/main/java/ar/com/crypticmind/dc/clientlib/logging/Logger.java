@@ -1,4 +1,4 @@
-package ar.com.crypticmind.dc.logging;
+package ar.com.crypticmind.dc.clientlib.logging;
 
 public interface Logger {
 

@@ -1,4 +1,4 @@
-package ar.com.crypticmind.dc;
+package ar.com.crypticmind.dc.clientlib;
 
 public interface Client {
 

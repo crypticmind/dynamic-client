@@ -2,7 +2,8 @@ package ar.com.crypticmind.dc
 
 import java.net.URL
 
-import ar.com.crypticmind.dc.logging.{Logger, Slf4jLogger}
+import ar.com.crypticmind.dc.clientlib.ClientProxy
+import ar.com.crypticmind.dc.clientlib.logging.{Logger, Slf4jLogger}
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.model.{HttpRequest, HttpResponse}
 import org.mockserver.socket.PortFactory
@@ -16,8 +17,9 @@ class ClientProxySpec extends WordSpec with Matchers with Eventually {
   
   private val port = PortFactory.findFreePort
   private val server = ClientAndServer.startClientAndServer(port)
+  private val version = ar.com.crypticmind.dc.clientimpl.Version.VERSION
   private val jarBytes = {
-    val is = getClass.getResourceAsStream("/dc-client-impl-" + Version.VERSION + ".jar")
+    val is = getClass.getResourceAsStream("/dc-client-impl-" + version + ".jar")
     Stream.continually(is.read).takeWhile(_ != -1).map(_.toByte).toArray
   }
 
@@ -29,7 +31,7 @@ class ClientProxySpec extends WordSpec with Matchers with Eventually {
     "get a client" in {
       server
         .when(HttpRequest.request.withPath("/dynamic-client/version"))
-        .respond(HttpResponse.response(Version.VERSION))
+        .respond(HttpResponse.response(version))
       server
         .when(HttpRequest.request.withPath("/dynamic-client/library"))
         .respond(HttpResponse.response.withBody(jarBytes))
@@ -43,7 +45,7 @@ class ClientProxySpec extends WordSpec with Matchers with Eventually {
         Option(cp.getClient) shouldBe defined
       }
 
-      Option(cp.getClient).map(c => c.version()) should contain (Version.VERSION)
+      Option(cp.getClient).map(c => c.version()) should contain (version)
       Option(cp.getClient).map(c => c.sum(2, 3)) should contain (5)
 
       server.verify(HttpRequest.request.withPath("/dynamic-client/version"))

@@ -1,6 +1,6 @@
-package ar.com.crypticmind.dc;
+package ar.com.crypticmind.dc.clientlib;
 
-import ar.com.crypticmind.dc.logging.Logger;
+import ar.com.crypticmind.dc.clientlib.logging.Logger;
 
 import java.lang.reflect.Constructor;
 import java.net.URL;
@@ -14,7 +14,7 @@ class Container implements AutoCloseable {
 
     Container(Path jarFile, URL endpoint, Logger logger) throws Exception {
         classLoader = new URLClassLoader(new URL[] { jarFile.toUri().toURL() }, ClientProxy.class.getClassLoader());
-        Class<?> impl = Class.forName("ar.com.crypticmind.dc.ClientImpl", true, classLoader);
+        Class<?> impl = Class.forName("ar.com.crypticmind.dc.clientimpl.ClientImpl", true, classLoader);
         Constructor<?> ctor = impl.getDeclaredConstructor(URL.class, Logger.class);
         client = Client.class.cast(ctor.newInstance(endpoint, logger));
     }
